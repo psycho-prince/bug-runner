@@ -3,15 +3,17 @@ const player = document.getElementById("player");
 const scoreEl = document.getElementById("score");
 const gameOverScreen = document.getElementById("game-over");
 
+/* PHYSICS */
 let y = 0;
 let velocity = 0;
 let gravity = 0.6;
-let jumpForce = 12;
+let jumpForce = 14;
 let grounded = true;
 
+/* GAME STATE */
 let score = 0;
 let speed = 6;
-let gameOver = false;
+let dead = false;
 
 /* INPUT */
 document.addEventListener("keydown", e => {
@@ -20,14 +22,14 @@ document.addEventListener("keydown", e => {
 document.addEventListener("touchstart", jump);
 
 function jump() {
-  if (!grounded || gameOver) return;
+  if (!grounded || dead) return;
   velocity = jumpForce;
   grounded = false;
 }
 
 /* PLAYER LOOP */
-function playerLoop() {
-  if (gameOver) return;
+function updatePlayer() {
+  if (dead) return;
 
   velocity -= gravity;
   y += velocity;
@@ -39,63 +41,60 @@ function playerLoop() {
   }
 
   player.style.bottom = 40 + y + "px";
-  requestAnimationFrame(playerLoop);
+  requestAnimationFrame(updatePlayer);
 }
-playerLoop();
+updatePlayer();
 
 /* BUG SPAWN */
-function spawnBug() {
-  if (gameOver) return;
+setInterval(() => {
+  if (dead) return;
 
   const bug = document.createElement("div");
   bug.className = "bug";
-  bug.style.left = game.clientWidth + "px";
+  let x = game.clientWidth;
+  bug.style.left = x + "px";
   game.appendChild(bug);
 
-  let x = game.clientWidth;
-
   const move = setInterval(() => {
-    if (gameOver) {
-      clearInterval(move);
+    if (dead) {
       bug.remove();
+      clearInterval(move);
       return;
     }
 
     x -= speed;
     bug.style.left = x + "px";
 
-    if (x < -50) {
-      clearInterval(move);
-      bug.remove();
-      score++;
-      scoreEl.textContent = `Score: ${score}`;
-      if (score % 5 === 0) speed += 0.5;
-    }
-
     if (hit(bug, player)) {
       endGame();
       clearInterval(move);
     }
-  }, 16);
-}
-setInterval(spawnBug, 1600);
 
-/* POWERUP */
-function spawnPowerUp() {
-  if (gameOver) return;
+    if (x < -60) {
+      score++;
+      scoreEl.textContent = "Score: " + score;
+      if (score % 5 === 0) speed += 0.5;
+      bug.remove();
+      clearInterval(move);
+    }
+  }, 16);
+}, 1600);
+
+/* POWER-UP SPAWN */
+setInterval(() => {
+  if (dead) return;
 
   const p = document.createElement("div");
   p.className = "powerup";
-  p.style.left = game.clientWidth + "px";
+  let x = game.clientWidth;
+  p.style.left = x + "px";
   p.style.bottom = "120px";
   game.appendChild(p);
 
-  let x = game.clientWidth;
-
   const move = setInterval(() => {
-    if (gameOver) {
-      clearInterval(move);
+    if (dead) {
       p.remove();
+      clearInterval(move);
       return;
     }
 
@@ -113,24 +112,24 @@ function spawnPowerUp() {
       clearInterval(move);
     }
   }, 16);
-}
-setInterval(spawnPowerUp, 7000);
+}, 6000);
 
 /* COLLISION */
 function hit(a, b) {
   const ar = a.getBoundingClientRect();
   const br = b.getBoundingClientRect();
+
   return !(
-    ar.right - 10 < br.left + 10 ||
-    ar.left + 10 > br.right - 10 ||
-    ar.bottom - 10 < br.top + 10 ||
-    ar.top + 10 > br.bottom - 10
+    ar.right - 12 < br.left + 12 ||
+    ar.left + 12 > br.right - 12 ||
+    ar.bottom - 12 < br.top + 12 ||
+    ar.top + 12 > br.bottom - 12
   );
 }
 
 /* GAME OVER */
 function endGame() {
-  gameOver = true;
+  dead = true;
   gameOverScreen.classList.remove("hidden");
 }
 
