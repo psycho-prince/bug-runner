@@ -3,9 +3,15 @@ const player = document.getElementById("player");
 const scoreEl = document.getElementById("score");
 const gameOverScreen = document.getElementById("game-over");
 
+/* ===== HARD RESET (CRITICAL) ===== */
+gameOverScreen.style.display = "none";   // force-hide overlay
+gameOverScreen.classList.add("hidden");  // backup
+
 /* GAME STATE */
 let started = false;
 let dead = false;
+let spawnEnabled = false;
+
 let score = 0;
 let speed = 6;
 
@@ -23,8 +29,19 @@ document.addEventListener("keydown", e => {
 document.addEventListener("touchstart", jump);
 
 function jump() {
-  if (!grounded || dead) return;
-  started = true;
+  if (dead) return;
+
+  if (!started) {
+    started = true;
+
+    // delay spawns so player is safe on start
+    setTimeout(() => {
+      spawnEnabled = true;
+    }, 600);
+  }
+
+  if (!grounded) return;
+
   velocity = jumpForce;
   grounded = false;
 }
@@ -49,7 +66,7 @@ updatePlayer();
 
 /* BUG SPAWN */
 setInterval(() => {
-  if (dead || !started) return;
+  if (dead || !spawnEnabled) return;
 
   const bug = document.createElement("div");
   bug.className = "bug";
@@ -67,24 +84,25 @@ setInterval(() => {
     x -= speed;
     bug.style.left = x + "px";
 
-    if (hit(bug, player)) {
-      endGame();
-      clearInterval(move);
-    }
-
-    if (x < -60) {
+    if (x < -80) {
       score++;
       scoreEl.textContent = "Score: " + score;
       if (score % 5 === 0) speed += 0.5;
       bug.remove();
       clearInterval(move);
+      return;
+    }
+
+    if (hit(bug, player)) {
+      endGame();
+      clearInterval(move);
     }
   }, 16);
 }, 1600);
 
-/* POWER-UP SPAWN (HEART) */
+/* POWER-UP (HEART) */
 setInterval(() => {
-  if (dead || !started) return;
+  if (dead || !spawnEnabled) return;
 
   const p = document.createElement("div");
   p.className = "powerup";
@@ -107,33 +125,35 @@ setInterval(() => {
       speed = Math.max(4, speed - 2);
       p.remove();
       clearInterval(move);
+      return;
     }
 
-    if (x < -40) {
+    if (x < -60) {
       p.remove();
       clearInterval(move);
     }
-  }, 6000);
+  }, 16);
 }, 6000);
 
-/* COLLISION — BIG SPRITE SAFE */
+/* COLLISION — DISABLED UNTIL SAFE */
 function hit(a, b) {
-  if (!started) return false;
+  if (!spawnEnabled) return false;
 
   const ar = a.getBoundingClientRect();
   const br = b.getBoundingClientRect();
 
   return !(
-    ar.right - 24 < br.left + 24 ||
-    ar.left + 24 > br.right - 24 ||
-    ar.bottom - 24 < br.top + 24 ||
-    ar.top + 24 > br.bottom - 24
+    ar.right - 30 < br.left + 30 ||
+    ar.left + 30 > br.right - 30 ||
+    ar.bottom - 30 < br.top + 30 ||
+    ar.top + 30 > br.bottom - 30
   );
 }
 
 /* GAME OVER */
 function endGame() {
   dead = true;
+  gameOverScreen.style.display = "flex";
   gameOverScreen.classList.remove("hidden");
 }
 
