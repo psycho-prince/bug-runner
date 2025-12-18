@@ -1,35 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Bug Runner</title>
-  <meta name="description" content="Bug Runner — a fast-paced dev-themed endless runner." />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bug Runner</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:monospace}
+body{background:#0d1117;color:#c9d1d9;overflow:hidden}
+
+#topbar,#footer{
+  position:fixed;
+  width:100%;
+  height:40px;
+  background:#0d1117;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 12px;
+  z-index:10
+}
+#topbar{top:0}
+#footer{bottom:0;font-size:12px;opacity:.6}
+
+#game{
+  position:absolute;
+  top:40px;
+  bottom:40px;
+  width:100%;
+  background:#161b22;
+  overflow:hidden
+}
+
+#score{position:absolute;top:10px;left:10px}
+
+#player{
+  position:absolute;
+  left:50px;
+  bottom:40px;
+  width:48px;
+  height:48px;
+  background:url("assets/player.png") center/contain no-repeat
+}
+
+.bug{
+  position:absolute;
+  bottom:40px;
+  width:40px;
+  height:40px;
+  background:url("assets/bug.png") center/contain no-repeat
+}
+
+#game-over{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:20
+}
+#game-over button{margin-top:10px;padding:8px 16px}
+</style>
 </head>
 
 <body>
 
-  <header id="topbar">
-    <div class="title">🐞 Bug-Runner</div>
-    <div class="hint">Tap / Space</div>
-  </header>
+<div id="topbar">
+  <div>🐞 Bug-Runner</div>
+  <div>Tap / Space</div>
+</div>
 
-  <main id="game">
-    <div id="score">Score: 0</div>
-    <div id="player"></div>
-  </main>
+<div id="game">
+  <div id="score">Score: 0</div>
+  <div id="player"></div>
+</div>
 
-  <section id="game-over" class="hidden">
-    <h1>💥 Bug Found</h1>
-    <p>You pushed to prod.</p>
-    <button onclick="restart()">Restart</button>
-  </section>
+<div id="game-over">
+  <h1>💥 Bug Found</h1>
+  <p>You pushed to prod.</p>
+  <button onclick="location.reload()">Restart</button>
+</div>
 
-  <footer id="footer">
-    Open-source · GitHub Pages
-  </footer>
+<div id="footer">Open-source · GitHub Pages</div>
 
-  <script src="game.js"></script>
+<script>
+const game=document.getElementById("game");
+const player=document.getElementById("player");
+const scoreEl=document.getElementById("score");
+const over=document.getElementById("game-over");
+
+let y=0,v=0,gravity=.6,jumpForce=12,grounded=true;
+let score=0,speed=6,dead=false;
+
+document.addEventListener("keydown",e=>e.code==="Space"&&jump());
+document.addEventListener("touchstart",jump);
+
+function jump(){
+  if(!grounded||dead)return;
+  v=jumpForce;grounded=false;
+}
+
+function loop(){
+  if(dead)return;
+  v-=gravity;y+=v;
+  if(y<=0){y=0;v=0;grounded=true}
+  player.style.bottom=40+y+"px";
+  requestAnimationFrame(loop);
+}
+loop();
+
+setInterval(()=>{
+  if(dead)return;
+  const b=document.createElement("div");
+  b.className="bug";
+  let x=game.clientWidth;
+  b.style.left=x+"px";
+  game.appendChild(b);
+
+  const move=setInterval(()=>{
+    if(dead){b.remove();clearInterval(move);return}
+    x-=speed;b.style.left=x+"px";
+
+    if(hit(b,player)){dead=true;over.style.display="flex"}
+    if(x<-50){score++;scoreEl.textContent="Score: "+score;b.remove();clearInterval(move)}
+  },16);
+},1600);
+
+function hit(a,b){
+  const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
+  return !(ar.right<br.left||ar.left>br.right||ar.bottom<br.top||ar.top>br.bottom);
+}
+</script>
+
 </body>
 </html>
