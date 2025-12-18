@@ -29,7 +29,6 @@ function jump() {
 
   if (!started) {
     started = true;
-    player.classList.add("running");
     startSpawns();
   }
 
@@ -57,7 +56,7 @@ function updatePlayer() {
 }
 updatePlayer();
 
-/* SPAWN CONTROL */
+/* SPAWN TIMERS */
 let bugTimer, powerTimer;
 
 function startSpawns() {
@@ -149,7 +148,6 @@ function endGame() {
   gameOver = true;
   clearInterval(bugTimer);
   clearInterval(powerTimer);
-  player.classList.remove("running");
   gameOverScreen.style.display = "flex";
 }
 
