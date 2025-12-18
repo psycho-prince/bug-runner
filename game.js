@@ -3,7 +3,7 @@ const player = document.getElementById("player");
 const scoreEl = document.getElementById("score");
 const gameOverScreen = document.getElementById("game-over");
 
-/* FORCE SAFE INITIAL STATE */
+/* INITIAL STATE */
 gameOverScreen.style.display = "none";
 
 /* GAME STATE */
@@ -31,6 +31,7 @@ function jump() {
   if (!gameStarted) {
     gameStarted = true;
     startSpawns();
+    player.classList.add("running"); // START RUN ANIMATION
   }
 
   if (!grounded) return;
@@ -57,7 +58,7 @@ function updatePlayer() {
 }
 updatePlayer();
 
-/* ========== SPAWN CONTROLLERS ========== */
+/* SPAWN TIMERS */
 let bugTimer = null;
 let powerTimer = null;
 
@@ -77,10 +78,7 @@ function spawnBug() {
   game.appendChild(bug);
 
   const move = setInterval(() => {
-    if (gameOver) {
-      cleanup();
-      return;
-    }
+    if (gameOver) cleanup();
 
     x -= speed;
     bug.style.left = x + "px";
@@ -88,7 +86,6 @@ function spawnBug() {
     if (checkHit(bug, player)) {
       endGame();
       cleanup();
-      return;
     }
 
     if (x < -80) {
@@ -105,7 +102,7 @@ function spawnBug() {
   }
 }
 
-/* POWER-UP (HEART) */
+/* POWER-UP */
 function spawnPowerUp() {
   if (gameOver) return;
 
@@ -117,23 +114,17 @@ function spawnPowerUp() {
   game.appendChild(p);
 
   const move = setInterval(() => {
-    if (gameOver) {
-      cleanup();
-      return;
-    }
+    if (gameOver) cleanup();
 
     x -= speed;
     p.style.left = x + "px";
 
     if (checkHit(p, player)) {
-      speed = Math.max(4, speed - 2); // reward
+      speed = Math.max(4, speed - 2);
       cleanup();
-      return;
     }
 
-    if (x < -60) {
-      cleanup();
-    }
+    if (x < -60) cleanup();
   }, 16);
 
   function cleanup() {
@@ -142,7 +133,7 @@ function spawnPowerUp() {
   }
 }
 
-/* COLLISION — AUTHORITATIVE */
+/* COLLISION */
 function checkHit(a, b) {
   const ar = a.getBoundingClientRect();
   const br = b.getBoundingClientRect();
@@ -160,6 +151,7 @@ function endGame() {
   gameOver = true;
   clearInterval(bugTimer);
   clearInterval(powerTimer);
+  player.classList.remove("running");
   gameOverScreen.style.display = "flex";
 }
 
