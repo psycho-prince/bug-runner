@@ -11,31 +11,25 @@ body {
   overflow: hidden;
 }
 
-/* HEADER */
-#topbar {
+/* UI */
+#topbar, #footer {
   position: fixed;
-  top: 0;
   height: 40px;
   width: 100%;
-  padding: 0 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   background: #0d1117;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
   z-index: 10;
 }
 
-/* FOOTER */
+#topbar { top: 0; }
 #footer {
-  position: fixed;
   bottom: 0;
-  height: 40px;
-  width: 100%;
-  text-align: center;
-  line-height: 40px;
   font-size: 12px;
   opacity: 0.6;
-  background: #0d1117;
+  justify-content: center;
 }
 
 /* GAME AREA */
@@ -48,14 +42,13 @@ body {
   overflow: hidden;
 }
 
-/* SCORE */
 #score {
   position: absolute;
   top: 10px;
   left: 10px;
 }
 
-/* PLAYER (RUN ANIMATION) */
+/* PLAYER (with fallback color) */
 #player {
   position: absolute;
   left: 50px;
@@ -63,22 +56,20 @@ body {
   width: 96px;
   height: 96px;
 
-  background-image: url("assets/player-run.png");
+  background-color: #58a6ff; /* fallback if image fails */
+  background-image: url("./assets/player-run.png");
   background-repeat: no-repeat;
   background-size: auto 100%;
-
-  animation: none;
 }
 
-/* RUNNING STATE */
+/* RUN ANIMATION */
 #player.running {
   animation: runAnim 0.6s steps(6) infinite;
 }
 
-/* CHANGE 6 → frame count if needed */
 @keyframes runAnim {
   from { background-position: 0 0; }
-  to { background-position: -576px 0; } /* 96px × 6 frames */
+  to { background-position: -576px 0; }
 }
 
 /* BUG */
@@ -87,7 +78,11 @@ body {
   bottom: 40px;
   width: 48px;
   height: 48px;
-  background: url("assets/bug.png") center / contain no-repeat;
+
+  background-color: #ff5555;
+  background-image: url("./assets/bug.png");
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
 /* POWER-UP */
@@ -95,7 +90,11 @@ body {
   position: absolute;
   width: 36px;
   height: 36px;
-  background: url("assets/powerup.png") center / contain no-repeat;
+
+  background-color: #ff4d4d;
+  background-image: url("./assets/powerup.png");
+  background-size: contain;
+  background-repeat: no-repeat;
   filter: drop-shadow(0 0 6px red);
 }
 
@@ -111,13 +110,6 @@ body {
   z-index: 20;
 }
 
-#game-over button {
-  margin-top: 12px;
-  padding: 8px 16px;
-  font-size: 16px;
-}
-
-/* UTIL */
 .hidden {
   display: none !important;
 }
