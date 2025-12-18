@@ -55,14 +55,30 @@ body {
   left: 10px;
 }
 
-/* PLAYER — BIGGER SIZE */
+/* PLAYER (RUN ANIMATION) */
 #player {
   position: absolute;
   left: 50px;
   bottom: 40px;
   width: 96px;
   height: 96px;
-  background: url("assets/player.png") center/contain no-repeat;
+
+  background-image: url("assets/player-run.png");
+  background-repeat: no-repeat;
+  background-size: auto 100%;
+
+  animation: none;
+}
+
+/* RUNNING STATE */
+#player.running {
+  animation: runAnim 0.6s steps(6) infinite;
+}
+
+/* CHANGE 6 → frame count if needed */
+@keyframes runAnim {
+  from { background-position: 0 0; }
+  to { background-position: -576px 0; } /* 96px × 6 frames */
 }
 
 /* BUG */
@@ -71,15 +87,15 @@ body {
   bottom: 40px;
   width: 48px;
   height: 48px;
-  background: url("assets/bug.png") center/contain no-repeat;
+  background: url("assets/bug.png") center / contain no-repeat;
 }
 
-/* POWER-UP (HEART) */
+/* POWER-UP */
 .powerup {
   position: absolute;
   width: 36px;
   height: 36px;
-  background: url("assets/powerup.png") center/contain no-repeat;
+  background: url("assets/powerup.png") center / contain no-repeat;
   filter: drop-shadow(0 0 6px red);
 }
 
@@ -103,5 +119,5 @@ body {
 
 /* UTIL */
 .hidden {
-  display: none;
+  display: none !important;
 }
