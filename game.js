@@ -3,11 +3,10 @@ const player = document.getElementById("player");
 const scoreEl = document.getElementById("score");
 const gameOverScreen = document.getElementById("game-over");
 
-/* INITIAL STATE */
 gameOverScreen.style.display = "none";
 
-/* GAME STATE */
-let gameStarted = false;
+/* STATE */
+let started = false;
 let gameOver = false;
 let score = 0;
 let speed = 6;
@@ -28,10 +27,10 @@ document.addEventListener("touchstart", jump);
 function jump() {
   if (gameOver) return;
 
-  if (!gameStarted) {
-    gameStarted = true;
+  if (!started) {
+    started = true;
+    player.classList.add("running");
     startSpawns();
-    player.classList.add("running"); // START RUN ANIMATION
   }
 
   if (!grounded) return;
@@ -58,9 +57,8 @@ function updatePlayer() {
 }
 updatePlayer();
 
-/* SPAWN TIMERS */
-let bugTimer = null;
-let powerTimer = null;
+/* SPAWN CONTROL */
+let bugTimer, powerTimer;
 
 function startSpawns() {
   bugTimer = setInterval(spawnBug, 1600);
@@ -83,14 +81,14 @@ function spawnBug() {
     x -= speed;
     bug.style.left = x + "px";
 
-    if (checkHit(bug, player)) {
+    if (hit(bug, player)) {
       endGame();
       cleanup();
     }
 
     if (x < -80) {
       score++;
-      scoreEl.textContent = "Score: " + score;
+      scoreEl.textContent = `Score: ${score}`;
       if (score % 5 === 0) speed += 0.5;
       cleanup();
     }
@@ -119,7 +117,7 @@ function spawnPowerUp() {
     x -= speed;
     p.style.left = x + "px";
 
-    if (checkHit(p, player)) {
+    if (hit(p, player)) {
       speed = Math.max(4, speed - 2);
       cleanup();
     }
@@ -134,7 +132,7 @@ function spawnPowerUp() {
 }
 
 /* COLLISION */
-function checkHit(a, b) {
+function hit(a, b) {
   const ar = a.getBoundingClientRect();
   const br = b.getBoundingClientRect();
 
