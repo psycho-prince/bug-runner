@@ -2,20 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+
   <title>Bug Runner</title>
+  <meta name="description" content="Bug Runner — a fast-paced developer-themed endless runner built for the web." />
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="game">
-    <div id="score">Score: 0</div>
-    <div id="player"></div>
-  </div>
 
-  <div id="game-over" class="hidden">
+  <!-- Header -->
+  <header id="topbar">
+    <span>🐞 Bug-Runner</span>
+    <span id="hint">Tap / Space to jump</span>
+  </header>
+
+  <!-- Game -->
+  <main id="game">
+    <div id="score">Score: 0</div>
+    <div id="player" aria-label="player"></div>
+  </main>
+
+  <!-- Game Over -->
+  <section id="game-over" class="hidden" role="dialog" aria-live="assertive">
     <h1>💥 Bug Found</h1>
+    <p>You shipped to prod.</p>
     <button onclick="restart()">Restart</button>
-  </div>
+  </section>
+
+  <!-- Footer -->
+  <footer id="footer">
+    Built with ❤️ by Rhyugen · Open Source
+  </footer>
 
   <script src="game.js"></script>
 </body>
