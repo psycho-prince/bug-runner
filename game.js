@@ -3,15 +3,12 @@ const player = document.getElementById("player");
 const scoreEl = document.getElementById("score");
 const gameOverScreen = document.getElementById("game-over");
 
-/* ===== HARD RESET (CRITICAL) ===== */
-gameOverScreen.style.display = "none";   // force-hide overlay
-gameOverScreen.classList.add("hidden");  // backup
+/* FORCE SAFE INITIAL STATE */
+gameOverScreen.style.display = "none";
 
 /* GAME STATE */
-let started = false;
-let dead = false;
-let spawnEnabled = false;
-
+let gameStarted = false;
+let gameOver = false;
 let score = 0;
 let speed = 6;
 
@@ -29,15 +26,11 @@ document.addEventListener("keydown", e => {
 document.addEventListener("touchstart", jump);
 
 function jump() {
-  if (dead) return;
+  if (gameOver) return;
 
-  if (!started) {
-    started = true;
-
-    // delay spawns so player is safe on start
-    setTimeout(() => {
-      spawnEnabled = true;
-    }, 600);
+  if (!gameStarted) {
+    gameStarted = true;
+    startSpawns();
   }
 
   if (!grounded) return;
@@ -48,7 +41,7 @@ function jump() {
 
 /* PLAYER LOOP */
 function updatePlayer() {
-  if (dead) return;
+  if (gameOver) return;
 
   velocity -= gravity;
   y += velocity;
@@ -64,9 +57,18 @@ function updatePlayer() {
 }
 updatePlayer();
 
-/* BUG SPAWN */
-setInterval(() => {
-  if (dead || !spawnEnabled) return;
+/* ========== SPAWN CONTROLLERS ========== */
+let bugTimer = null;
+let powerTimer = null;
+
+function startSpawns() {
+  bugTimer = setInterval(spawnBug, 1600);
+  powerTimer = setInterval(spawnPowerUp, 6000);
+}
+
+/* BUG */
+function spawnBug() {
+  if (gameOver) return;
 
   const bug = document.createElement("div");
   bug.className = "bug";
@@ -75,34 +77,37 @@ setInterval(() => {
   game.appendChild(bug);
 
   const move = setInterval(() => {
-    if (dead) {
-      bug.remove();
-      clearInterval(move);
+    if (gameOver) {
+      cleanup();
       return;
     }
 
     x -= speed;
     bug.style.left = x + "px";
 
+    if (checkHit(bug, player)) {
+      endGame();
+      cleanup();
+      return;
+    }
+
     if (x < -80) {
       score++;
       scoreEl.textContent = "Score: " + score;
       if (score % 5 === 0) speed += 0.5;
-      bug.remove();
-      clearInterval(move);
-      return;
-    }
-
-    if (hit(bug, player)) {
-      endGame();
-      clearInterval(move);
+      cleanup();
     }
   }, 16);
-}, 1600);
+
+  function cleanup() {
+    clearInterval(move);
+    bug.remove();
+  }
+}
 
 /* POWER-UP (HEART) */
-setInterval(() => {
-  if (dead || !spawnEnabled) return;
+function spawnPowerUp() {
+  if (gameOver) return;
 
   const p = document.createElement("div");
   p.className = "powerup";
@@ -112,49 +117,50 @@ setInterval(() => {
   game.appendChild(p);
 
   const move = setInterval(() => {
-    if (dead) {
-      p.remove();
-      clearInterval(move);
+    if (gameOver) {
+      cleanup();
       return;
     }
 
     x -= speed;
     p.style.left = x + "px";
 
-    if (hit(p, player)) {
-      speed = Math.max(4, speed - 2);
-      p.remove();
-      clearInterval(move);
+    if (checkHit(p, player)) {
+      speed = Math.max(4, speed - 2); // reward
+      cleanup();
       return;
     }
 
     if (x < -60) {
-      p.remove();
-      clearInterval(move);
+      cleanup();
     }
   }, 16);
-}, 6000);
 
-/* COLLISION — DISABLED UNTIL SAFE */
-function hit(a, b) {
-  if (!spawnEnabled) return false;
+  function cleanup() {
+    clearInterval(move);
+    p.remove();
+  }
+}
 
+/* COLLISION — AUTHORITATIVE */
+function checkHit(a, b) {
   const ar = a.getBoundingClientRect();
   const br = b.getBoundingClientRect();
 
   return !(
-    ar.right - 30 < br.left + 30 ||
-    ar.left + 30 > br.right - 30 ||
-    ar.bottom - 30 < br.top + 30 ||
-    ar.top + 30 > br.bottom - 30
+    ar.right - 20 < br.left + 20 ||
+    ar.left + 20 > br.right - 20 ||
+    ar.bottom - 20 < br.top + 20 ||
+    ar.top + 20 > br.bottom - 20
   );
 }
 
 /* GAME OVER */
 function endGame() {
-  dead = true;
+  gameOver = true;
+  clearInterval(bugTimer);
+  clearInterval(powerTimer);
   gameOverScreen.style.display = "flex";
-  gameOverScreen.classList.remove("hidden");
 }
 
 function restart() {
