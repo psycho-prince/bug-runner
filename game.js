@@ -3,17 +3,18 @@ const player = document.getElementById("player");
 const scoreEl = document.getElementById("score");
 const gameOverScreen = document.getElementById("game-over");
 
+/* GAME STATE */
+let started = false;
+let dead = false;
+let score = 0;
+let speed = 6;
+
 /* PHYSICS */
 let y = 0;
 let velocity = 0;
 let gravity = 0.6;
 let jumpForce = 14;
 let grounded = true;
-
-/* GAME STATE */
-let score = 0;
-let speed = 6;
-let dead = false;
 
 /* INPUT */
 document.addEventListener("keydown", e => {
@@ -23,6 +24,7 @@ document.addEventListener("touchstart", jump);
 
 function jump() {
   if (!grounded || dead) return;
+  started = true;
   velocity = jumpForce;
   grounded = false;
 }
@@ -47,7 +49,7 @@ updatePlayer();
 
 /* BUG SPAWN */
 setInterval(() => {
-  if (dead) return;
+  if (dead || !started) return;
 
   const bug = document.createElement("div");
   bug.className = "bug";
@@ -80,9 +82,9 @@ setInterval(() => {
   }, 16);
 }, 1600);
 
-/* POWER-UP SPAWN */
+/* POWER-UP SPAWN (HEART) */
 setInterval(() => {
-  if (dead) return;
+  if (dead || !started) return;
 
   const p = document.createElement("div");
   p.className = "powerup";
@@ -111,19 +113,21 @@ setInterval(() => {
       p.remove();
       clearInterval(move);
     }
-  }, 16);
+  }, 6000);
 }, 6000);
 
-/* COLLISION */
+/* COLLISION — BIG SPRITE SAFE */
 function hit(a, b) {
+  if (!started) return false;
+
   const ar = a.getBoundingClientRect();
   const br = b.getBoundingClientRect();
 
   return !(
-    ar.right - 12 < br.left + 12 ||
-    ar.left + 12 > br.right - 12 ||
-    ar.bottom - 12 < br.top + 12 ||
-    ar.top + 12 > br.bottom - 12
+    ar.right - 24 < br.left + 24 ||
+    ar.left + 24 > br.right - 24 ||
+    ar.bottom - 24 < br.top + 24 ||
+    ar.top + 24 > br.bottom - 24
   );
 }
 
