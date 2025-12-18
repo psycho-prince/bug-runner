@@ -1,0 +1,56 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: monospace;
+}
+
+body {
+  background: #0d1117;
+  color: #c9d1d9;
+  overflow: hidden;
+}
+
+#game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(#0d1117, #161b22);
+}
+
+#player {
+  position: absolute;
+  bottom: 40px;
+  left: 50px;
+  width: 48px;
+  height: 48px;
+  background: url("assets/player.png") no-repeat center/contain;
+}
+
+.bug {
+  position: absolute;
+  bottom: 40px;
+  width: 40px;
+  height: 40px;
+  background: url("assets/bug.png") no-repeat center/contain;
+}
+
+#score {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+#game-over {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.hidden {
+  display: none;
+}
